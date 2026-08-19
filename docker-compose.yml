@@ -1,0 +1,63 @@
+services:
+  api:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    environment: &app-env
+      DATA_DIR: /data
+      DATABASE_URL: sqlite:////data/app.db
+      REDIS_URL: redis://redis:6379/0
+      DETECTOR_BACKEND: ${DETECTOR_BACKEND:-mmdet}
+      MMDET_CONFIG: /app/mmdet_configs/rtmdet_tiny_bag.py
+      MMDET_CHECKPOINT: /models/rtmdet_bag.pth
+      DEVICE: ${DEVICE:-cpu}
+      CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.35}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+      - ./models:/models
+      - ./dataset:/dataset
+      - ./work_dirs:/work_dirs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: celery -A worker.celery_app.celery_app worker --loglevel=INFO --concurrency=1
+    environment: *app-env
+    volumes:
+      - ./data:/data
+      - ./models:/models
+      - ./dataset:/dataset
+      - ./work_dirs:/work_dirs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+    restart: unless-stopped
+
+  trainer:
+    build: .
+    profiles: ["train"]
+    command: /app/scripts/train.sh
+    environment: *app-env
+    volumes:
+      - ./dataset:/dataset
+      - ./models:/models
+      - ./work_dirs:/work_dirs
+
+volumes:
+  redis_data:

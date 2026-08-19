@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ app_name }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">COMPUTER VISION / MMDETECTION</div>
+        <h1>Conveyor Bag Counter</h1>
+        <p>Upload a conveyor video, start asynchronous inference and download the annotated result.</p>
+      </div>
+      <div class="badge">FastAPI · Celery · Redis</div>
+    </section>
+
+    <section class="card">
+      <label class="drop" for="video">
+        <strong>Select video</strong>
+        <span>MP4, MOV, AVI, MKV or WEBM</span>
+        <input id="video" type="file" accept="video/*" />
+      </label>
+      <button id="uploadBtn">Upload & create job</button>
+    </section>
+
+    <section class="card hidden" id="jobCard">
+      <div class="row"><span>Job</span><code id="jobId"></code></div>
+      <div class="row"><span>Status</span><strong id="status">—</strong></div>
+      <div class="progress"><div id="bar"></div></div>
+      <div class="metrics">
+        <div><span>Progress</span><strong id="progress">0%</strong></div>
+        <div><span>Bags</span><strong id="count">0</strong></div>
+        <div><span>Anomalies</span><strong id="anomalies">0</strong></div>
+        <div><span>Proc FPS</span><strong id="fps">—</strong></div>
+      </div>
+      <div class="actions">
+        <button id="startBtn">Start processing</button>
+        <a id="downloadBtn" class="button secondary disabled" href="#">Download result</a>
+      </div>
+      <pre id="error" class="error hidden"></pre>
+    </section>
+  </main>
+<script src="/static/app.js"></script>
+</body>
+</html>

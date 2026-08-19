@@ -1,0 +1,12 @@
+__pycache__/
+.pytest_cache/
+.venv/
+.env
+*.pyc
+*.pth
+/data/*
+!/data/.gitkeep
+/models/*
+!/models/.gitkeep
+/dataset/
+/work_dirs/

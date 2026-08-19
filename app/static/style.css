@@ -1,0 +1,28 @@
+:root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; color: #172033; background: #f3f5f8; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.shell { width: min(980px, calc(100% - 32px)); margin: 56px auto; }
+.hero { display:flex; justify-content:space-between; gap:32px; align-items:flex-end; margin-bottom:24px; }
+h1 { font-size: clamp(34px, 5vw, 58px); line-height:1; letter-spacing:-.04em; margin:8px 0 12px; }
+p { color:#667085; max-width:650px; margin:0; }
+.eyebrow { font-weight:800; font-size:12px; letter-spacing:.14em; color:#5b6ef5; }
+.badge { background:#172033; color:white; padding:10px 14px; border-radius:99px; font-size:13px; white-space:nowrap; }
+.card { background:white; border:1px solid #e2e7ef; border-radius:20px; padding:24px; margin:18px 0; box-shadow:0 16px 50px rgba(17,24,39,.06); }
+.drop { display:flex; flex-direction:column; padding:34px; border:2px dashed #cbd3df; border-radius:15px; cursor:pointer; margin-bottom:16px; }
+.drop span { color:#7b8495; margin-top:5px; }
+.drop input { margin-top:18px; }
+button,.button { appearance:none; border:0; border-radius:10px; padding:12px 16px; font-weight:750; background:#5b6ef5; color:white; cursor:pointer; text-decoration:none; display:inline-flex; justify-content:center; }
+.secondary { background:#edf0f5; color:#273142; }
+.disabled { opacity:.45; pointer-events:none; }
+.hidden { display:none; }
+.row { display:flex; justify-content:space-between; gap:16px; padding:7px 0; }
+code { overflow-wrap:anywhere; }
+.progress { height:12px; background:#edf0f5; border-radius:99px; overflow:hidden; margin:18px 0; }
+.progress div { height:100%; width:0%; background:#5b6ef5; transition:width .3s ease; }
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.metrics div { padding:16px; background:#f7f8fa; border-radius:12px; }
+.metrics span { display:block; color:#7b8495; font-size:12px; margin-bottom:6px; }
+.metrics strong { font-size:25px; }
+.actions { display:flex; gap:10px; margin-top:20px; }
+.error { white-space:pre-wrap; color:#a11; background:#fff1f1; padding:12px; border-radius:9px; }
+@media (max-width:700px){ .hero{align-items:flex-start;flex-direction:column}.metrics{grid-template-columns:1fr 1fr}.badge{display:none} }
