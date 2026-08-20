@@ -29,7 +29,7 @@ The final full-video run used the real `mmdet` backend and RTMDet checkpoint, ne
 
 The 14,999-frame annotated production result was visually inspected. Short real-MMDetection checks also matched the independent crossings: 20–32 s **4/4**, 180–192 s **1/1**, and 540–554 s **5/5**.
 
-The checkpoint and annotated result are intentionally excluded from normal Git history: GitHub rejects normal Git blobs above 100 MB, while the final result video is approximately 120 MB. They are available in the local submission bundle at `models/rtmdet_bag.pth` and `data/results/04220166-ec7e-4769-8732-8d3a18ce3377.mp4`; publish them as GitHub Release assets for distribution.
+The checkpoint and annotated result are intentionally excluded from normal Git history: GitHub rejects normal Git blobs above 100 MB, while the final result video is approximately 120 MB. They are available from the [v1.0.1 release](https://github.com/antony502189-max/Model-MP4/releases/tag/v1.0.1): [checkpoint](https://github.com/antony502189-max/Model-MP4/releases/download/v1.0.1/rtmdet_bag.pth), [source video](https://github.com/antony502189-max/Model-MP4/releases/download/v1.0.1/input.mp4), [annotated result](https://github.com/antony502189-max/Model-MP4/releases/download/v1.0.1/conveyor_bag_counter_result.mp4), and [application demonstration](https://github.com/antony502189-max/Model-MP4/releases/download/v1.0.1/model_mp4_demo.mp4).
 
 ## Architecture
 
