@@ -41,8 +41,12 @@
         <a id="downloadBtn" class="button secondary disabled" href="#">Download result</a>
       </div>
       <pre id="error" class="error hidden"></pre>
+      <section class="anomaly-panel" aria-live="polite">
+        <div class="row"><strong>Monitoring anomalies</strong><span id="anomalyHint">No anomalies recorded.</span></div>
+        <ul id="anomalyList" class="anomaly-list"></ul>
+      </section>
     </section>
   </main>
-<script src="/static/app.js"></script>
+<script src="/static/app.js?v=production-validation-2"></script>
 </body>
 </html>

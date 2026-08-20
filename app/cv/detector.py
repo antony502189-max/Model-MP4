@@ -10,6 +10,27 @@ from app.config import settings
 from app.cv.types import Detection
 
 
+def bbox_iou(first: tuple[float, float, float, float], second: tuple[float, float, float, float]) -> float:
+    x1 = max(first[0], second[0])
+    y1 = max(first[1], second[1])
+    x2 = min(first[2], second[2])
+    y2 = min(first[3], second[3])
+    intersection = max(0.0, x2 - x1) * max(0.0, y2 - y1)
+    first_area = max(0.0, first[2] - first[0]) * max(0.0, first[3] - first[1])
+    second_area = max(0.0, second[2] - second[0]) * max(0.0, second[3] - second[1])
+    union = first_area + second_area - intersection
+    return intersection / union if union else 0.0
+
+
+def suppress_overlaps(detections: list[Detection], max_iou: float) -> list[Detection]:
+    """Keep the highest-score detection for each strongly overlapping bag."""
+    kept: list[Detection] = []
+    for detection in sorted(detections, key=lambda item: item.score, reverse=True):
+        if all(bbox_iou(detection.bbox, existing.bbox) < max_iou for existing in kept):
+            kept.append(detection)
+    return kept
+
+
 class Detector(ABC):
     name: str
 
@@ -54,7 +75,10 @@ class MMDetectionDetector(Detector):
             if cv2.pointPolygonTest(roi, center, False) < 0:
                 continue
             detections.append(Detection((x1, y1, x2, y2), float(score), int(label)))
-        return detections
+        # RTMDet's model-level NMS is deliberately permissive for COCO.  With
+        # this one-class conveyor camera it can leave nested boxes for one bag,
+        # creating duplicate tracks and false heavy-occlusion alerts.
+        return suppress_overlaps(detections, settings.detection_nms_iou_threshold)
 
 
 class ContrastBootstrapDetector(Detector):

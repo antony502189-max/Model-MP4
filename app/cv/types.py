@@ -23,6 +23,7 @@ class Track:
     counted: bool = False
     centers: list[tuple[float, float]] = field(default_factory=list)
     last_frame: int = 0
+    velocity: tuple[float, float] = (0.0, 0.0)
 
     @property
     def center(self) -> tuple[float, float]:

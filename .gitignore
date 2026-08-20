@@ -10,3 +10,4 @@ __pycache__/
 !/models/.gitkeep
 /dataset/
 /work_dirs/
+/input.mp4

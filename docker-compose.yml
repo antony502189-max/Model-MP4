@@ -1,6 +1,16 @@
 services:
   api:
-    build: .
+    image: model-mp4:local
+    build: &app-build
+      context: .
+      extra_hosts:
+        - "pypi.org:151.101.0.223"
+        - "files.pythonhosted.org:151.101.0.223"
+        - "download.pytorch.org:3.164.230.12"
+        # PyTorch's wheel index redirects here in some regions. Docker Desktop
+        # on this machine does not resolve that hostname reliably.
+        - "download-r2.pytorch.org:3.164.230.12"
+        - "download.openmmlab.com:163.181.254.181"
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     environment: &app-env
       DATA_DIR: /data
@@ -12,7 +22,7 @@ services:
       DEVICE: ${DEVICE:-cpu}
       CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.35}
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8001}:8000"
     volumes:
       - ./data:/data
       - ./models:/models
@@ -24,7 +34,7 @@ services:
     restart: unless-stopped
 
   worker:
-    build: .
+    image: model-mp4:local
     command: celery -A worker.celery_app.celery_app worker --loglevel=INFO --concurrency=1
     environment: *app-env
     volumes:
@@ -50,14 +60,20 @@ services:
     restart: unless-stopped
 
   trainer:
-    build: .
+    image: model-mp4:local
+    build: *app-build
     profiles: ["train"]
+    shm_size: "1gb"
     command: /app/scripts/train.sh
     environment: *app-env
+    extra_hosts:
+      - "download.openmmlab.com:163.181.254.181"
     volumes:
       - ./dataset:/dataset
       - ./models:/models
       - ./work_dirs:/work_dirs
+      - torch_cache:/root/.cache/torch
 
 volumes:
   redis_data:
+  torch_cache:

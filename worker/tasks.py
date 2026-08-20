@@ -11,6 +11,11 @@ def process_video_task(self, job_id: str):
     job = get_job(job_id)
     if not job:
         raise RuntimeError(f'Job not found: {job_id}')
+    if job.status not in {'queued', 'failed'}:
+        # Celery/Redis can redeliver a message after a worker interruption or
+        # visibility timeout.  Jobs are idempotent: a completed, cancelled or
+        # already-processing job must never trigger another full render.
+        return {'job_id': job_id, 'skipped': True, 'status': job.status}
 
     mark_started(job_id, settings.detector_backend)
     output_path = settings.results_dir / f'{job_id}.mp4'

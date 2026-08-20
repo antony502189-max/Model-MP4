@@ -37,9 +37,14 @@ def process_video(input_path: str, output_path: str, progress_cb: ProgressCallba
     line_a = (int(settings.line_x1 * width), int(settings.line_y1 * height))
     line_b = (int(settings.line_x2 * width), int(settings.line_y2 * height))
 
-    tracker = IoUTracker(settings.tracker_iou_threshold, settings.tracker_max_age, settings.tracker_min_hits)
-    counter = LineCounter(line_a, line_b, settings.count_direction)
-    monitor = AnomalyMonitor(fps, (line_a[1] + line_b[1]) / 2)
+    tracker = IoUTracker(
+        settings.tracker_iou_threshold,
+        settings.tracker_max_age,
+        settings.tracker_min_hits,
+        settings.tracker_prediction_max_age,
+    )
+    counter = LineCounter(line_a, line_b, settings.count_direction, settings.line_crossing_min_motion)
+    monitor = AnomalyMonitor(fps, (line_a[1] + line_b[1]) / 2, settings.count_direction)
 
     started = time.perf_counter()
     frame_index = 0

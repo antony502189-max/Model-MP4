@@ -1,0 +1,10 @@
+.git
+.env
+.venv
+__pycache__
+.pytest_cache
+input.mp4
+data
+dataset
+models
+work_dirs

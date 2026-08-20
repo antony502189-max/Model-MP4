@@ -27,9 +27,15 @@ def mark_started(job_id: str, backend: str) -> None:
         job_id,
         status='processing',
         progress=0.0,
+        bag_count=0,
+        anomaly_count=0,
+        anomalies_json='[]',
+        output_path=None,
+        processing_fps=None,
         detector_backend=backend,
         error=None,
         started_at=datetime.now(timezone.utc),
+        finished_at=None,
     )
 
 

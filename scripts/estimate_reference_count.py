@@ -9,14 +9,19 @@ import numpy as np
 
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('video'); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument('video')
+    ap.add_argument('--start', type=float, default=0.0, help='start time in seconds')
+    ap.add_argument('--duration', type=float, help='optional interval duration in seconds')
+    args=ap.parse_args()
     cap=cv2.VideoCapture(args.video); fps=cap.get(cv2.CAP_PROP_FPS) or 25
+    cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, round(args.start * fps)))
+    end_frame = None if args.duration is None else max(1, round(args.duration * fps))
     # Belt perspective corners for the supplied 640x360 camera.
     src=np.float32([[313,53],[373,53],[210,359],[27,359]])
     dst=np.float32([[0,0],[249,0],[249,599],[0,599]])
     matrix=cv2.getPerspectiveTransform(src,dst)
     scores=[]; frame_idx=0
-    while True:
+    while end_frame is None or frame_idx < end_frame:
         ok,frame=cap.read()
         if not ok: break
         if frame_idx % 5 == 0:

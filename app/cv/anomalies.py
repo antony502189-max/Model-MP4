@@ -20,9 +20,10 @@ class Anomaly:
 
 
 class AnomalyMonitor:
-    def __init__(self, fps: float, line_y: float) -> None:
+    def __init__(self, fps: float, line_y: float, direction: str = 'down') -> None:
         self.fps = max(fps, 1.0)
         self.line_y = line_y
+        self.direction = direction
         self.items: list[Anomaly] = []
         self._seen: set[tuple] = set()
 
@@ -44,7 +45,13 @@ class AnomalyMonitor:
 
             if len(track.centers) >= 8:
                 dy = track.centers[-1][1] - track.centers[-8][1]
-                if dy < -12:
+                motion = {
+                    'down': dy,
+                    'up': -dy,
+                    'right': track.centers[-1][0] - track.centers[-8][0],
+                    'left': track.centers[-8][0] - track.centers[-1][0],
+                }.get(self.direction, dy)
+                if motion < -12:
                     self._emit(Anomaly(ts, frame_index, 'reverse_motion', 'medium',
                                        'Object moved opposite to configured conveyor direction.', track.id))
                 total_move = sum(

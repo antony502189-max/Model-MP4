@@ -8,7 +8,8 @@ from sqlalchemy import select
 from app.db import SessionLocal
 from app.models import Job
 from app.schemas import AnomalyResponse, JobResponse
-from app.services.storage import safe_video_path, save_upload
+from app.services.jobs import update_job
+from app.services.storage import safe_video_path, save_upload, validate_video
 from worker.tasks import process_video_task
 
 router = APIRouter(prefix='/api')
@@ -22,6 +23,11 @@ async def upload_video(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     await save_upload(file, destination)
+    try:
+        validate_video(destination)
+    except ValueError as exc:
+        destination.unlink(missing_ok=True)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     job = Job(id=job_id, original_name=file.filename or destination.name, input_path=str(destination), status='uploaded')
     with SessionLocal() as db:
         db.add(job)
@@ -43,7 +49,11 @@ def start_job(job_id: str):
         job.error = None
         db.commit()
         db.refresh(job)
-    process_video_task.delay(job_id)
+    try:
+        process_video_task.delay(job_id)
+    except Exception as exc:
+        update_job(job_id, status='failed', error=f'Could not queue worker task: {exc}')
+        raise HTTPException(status_code=503, detail='Worker queue is unavailable') from exc
     return job
 
 

@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -7,16 +9,18 @@ from app.api.routes import router
 from app.config import settings
 from app.db import init_db
 
-app = FastAPI(title=settings.app_name, version='1.0.0')
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    settings.data_dir.mkdir(parents=True, exist_ok=True)
+    init_db()
+    yield
+
+
+app = FastAPI(title=settings.app_name, version='1.0.0', lifespan=lifespan)
 app.include_router(router)
 app.mount('/static', StaticFiles(directory='app/static'), name='static')
 templates = Jinja2Templates(directory='app/templates')
-
-
-@app.on_event('startup')
-def startup() -> None:
-    settings.data_dir.mkdir(parents=True, exist_ok=True)
-    init_db()
 
 
 @app.get('/', response_class=HTMLResponse)
