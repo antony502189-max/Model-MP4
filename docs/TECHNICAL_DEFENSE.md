@@ -20,11 +20,11 @@ A directional line is more robust than “count when center enters an ROI”. It
 
 ## What happens if the detector misses a few frames?
 
-The tracker keeps unmatched tracks alive for `max_age` frames. If the same object is detected again with sufficient spatial overlap, it is matched back to the existing ID. A temporary loss near the line is also emitted as an anomaly because that is the highest-risk location for duplicate counting.
+The tracker keeps unmatched tracks alive for `max_age` frames and advances a confirmed track by its velocity for at most three missing frames. This bridges a single detector dropout at the line without inventing a long unobserved path. Post-ROI NMS at IoU 0.35 also removes nested one-class RTMDet boxes before association. A temporary loss near the line remains an anomaly because that is the highest-risk location for duplicate counting.
 
 ## Why not ByteTrack directly?
 
-ByteTrack is a good production choice and can replace the current tracker. For a test assignment, the deterministic IoU tracker has two advantages: the identity logic is small enough to audit in full, and the fixed camera with moderate frame-to-frame motion makes IoU matching adequate after detector fine-tuning. The interfaces intentionally isolate the tracker so ByteTrack is a local replacement rather than an architectural rewrite.
+ByteTrack is a good production choice and can replace the current tracker. For a test assignment, the deterministic IoU tracker has two advantages: the identity logic is small enough to audit in full, and the fixed camera with moderate frame-to-frame motion makes IoU matching adequate after detector fine-tuning. Real-MMDetection validation on 20–32 s, 180–192 s and 540–554 s clips matched independent crossings 4/4, 1/1 and 5/5, respectively. The interfaces intentionally isolate the tracker so ByteTrack is a local replacement rather than an architectural rewrite.
 
 If asked what would be changed for a busier conveyor: use ByteTrack/OC-SORT, add appearance embeddings if necessary, tune low/high confidence association thresholds, and measure IDF1/HOTA in addition to detection AP.
 
@@ -63,6 +63,12 @@ Use three layers:
 3. end-to-end count on `input.mp4` compared with the independent fixed-line reference of 130 events, followed by manual review of disagreements.
 
 For the final submission, manually inspect every discrepancy between the RTMDet result and the reference rather than blindly forcing the number to 130.
+
+## Final measured result
+
+The delivered `models/rtmdet_bag.pth` achieved held-out bbox mAP .785 (mAP@.50 .981, mAP@.75 .922, AR@100 .840). The final real-MMDetection job counted **127** passages on `input.mp4`, versus an independent reference of approximately **130** (difference -3, -2.3%). Visual review confirmed boxes, labels, count overlay, ROI and calibrated line on the 14,999-frame result.
+
+The 34 persisted anomalies are observational rather than count adjustments: 18 `possible_stall`, 6 `reverse_motion`, 5 `heavy_occlusion` and 5 `tracking_gap_near_line`. This is a large reduction from the pre-fix run, whose wrong `down` direction and nested detections yielded 498 mostly false alerts.
 
 ## Known trade-offs
 

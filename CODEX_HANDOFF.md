@@ -15,7 +15,7 @@ Implemented:
 - Docker/Docker Compose setup, web UI, tests and training/bootstrap scripts;
 - independent reference-event analysis for the supplied test video.
 
-The independent sanity-check currently yields **130 bag passages** on the supplied `input.mp4`. This is a validation reference, not the final MMDetection result.
+The independent sanity-check yields **130 bag passages** on the supplied `input.mp4`. This is a validation reference, not the final MMDetection result. The final production MMDetection result is **127** passages (difference -3).
 
 ## External source material
 
@@ -32,18 +32,18 @@ Generated outside Git:
 - reference preview video;
 - independent reference count: 130 passages.
 
-## Highest-priority next work
+## Completed production validation
 
-1. Obtain `input.mp4` from the Drive folder and place it in repository root.
-2. Run/inspect the bootstrap dataset generator and correct pseudo-labels if needed.
-3. Verify the MMDetection config against the exact installed MMDetection/MMEngine versions.
-4. Fine-tune RTMDet-tiny and produce `models/rtmdet_bag.pth`.
-5. Process the complete `input.mp4` through the actual MMDetection pipeline.
-6. Compare final count with the independent 130-event reference; inspect any discrepancy frame-by-frame.
-7. Harden tracker/counting behavior around occlusion and lost tracks near the line. If needed, replace the simple IoU tracker with ByteTrack while preserving the current counting interface.
-8. Run all tests and add integration tests for API/job lifecycle.
-9. Validate `docker compose up --build` from a clean machine/state.
-10. Update README with the final measured MMDetection count, model metrics, training details and exact runtime instructions.
+- `models/rtmdet_bag.pth` loads through MMDetection as one-class RTMDet.
+- 60-epoch held-out metrics: mAP .785, mAP@.50 .981, mAP@.75 .922, AR@100 .840.
+- `docker compose up --build` was run with healthy FastAPI, Redis and Celery.
+- Final real-MMDetection job: `04220166-ec7e-4769-8732-8d3a18ce3377`.
+- Final count: 127; independent reference: 130; difference: -3.
+- Final anomaly breakdown: possible_stall 18, reverse_motion 6, heavy_occlusion 5, tracking_gap_near_line 5.
+- Result: `data/results/04220166-ec7e-4769-8732-8d3a18ce3377.mp4`.
+- Short-clip validation: 20–32 s 4/4, 180–192 s 1/1, 540–554 s 5/5.
+
+The production fix was not a retrain. Bags travel upward in image coordinates, so the count direction is `up`; the line is correctly calibrated at y=186 px. Post-ROI NMS removes nested RTMDet boxes, a three-frame velocity bridge covers short detector gaps, and the directional motion floor is 0.25 px. Celery uses a 12-hour Redis visibility timeout plus job idempotency to avoid a second multi-hour render after redelivery.
 
 ## Important integrity constraint
 
@@ -56,7 +56,7 @@ pytest -q
 python scripts/estimate_reference_count.py input.mp4
 python scripts/bootstrap_dataset.py input.mp4 --out dataset --samples 600
 cp .env.example .env
-docker compose --profile train run --rm trainer
+docker compose --profile train run --build --rm trainer
 docker compose up --build
 ```
 
