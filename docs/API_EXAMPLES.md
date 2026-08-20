@@ -1,6 +1,6 @@
 # API examples
 
-Assume the service is running with the default Compose mapping on `localhost:8001`.
+Assume the service is running with the default Compose mapping on `localhost:8001`. Replace `<job-id>` with the ID returned by the upload endpoint.
 Set `API_PORT=8000` in `.env` if port 8000 is available on your machine, then
 replace `8001` below with `8000`.
 
@@ -20,7 +20,7 @@ Example response:
 
 ```json
 {
-  "id": "4d3c1c16-e03f-4b0e-8e59-cb84dd1fbc37",
+  "id": "example-job-id",
   "original_name": "input.mp4",
   "status": "uploaded",
   "progress": 0.0,
@@ -32,7 +32,7 @@ Example response:
 ## Start
 
 ```bash
-curl -X POST http://localhost:8001/api/jobs/4d3c1c16-e03f-4b0e-8e59-cb84dd1fbc37/start
+curl -X POST http://localhost:8001/api/jobs/<job-id>/start
 ```
 
 The response is HTTP 202. Inference continues in the Celery worker after the request completes.
@@ -40,17 +40,17 @@ The response is HTTP 202. Inference continues in the Celery worker after the req
 ## Poll
 
 ```bash
-curl http://localhost:8001/api/jobs/4d3c1c16-e03f-4b0e-8e59-cb84dd1fbc37
+curl http://localhost:8001/api/jobs/<job-id>
 ```
 
 ## Anomalies
 
 ```bash
-curl http://localhost:8001/api/jobs/4d3c1c16-e03f-4b0e-8e59-cb84dd1fbc37/anomalies
+curl http://localhost:8001/api/jobs/<job-id>/anomalies
 ```
 
 ## Download
 
 ```bash
-curl -OJ http://localhost:8001/api/jobs/4d3c1c16-e03f-4b0e-8e59-cb84dd1fbc37/result
+curl -OJ http://localhost:8001/api/jobs/<job-id>/result
 ```
